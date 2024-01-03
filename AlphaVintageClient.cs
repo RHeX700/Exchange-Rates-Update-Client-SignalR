@@ -15,7 +15,7 @@ public class AlphaVintageClient
         this.toCurrency = toCurrency;
     }
 
-    public async Task<AlphaVintageExchangeRateResponse> Query()
+    public async Task<string> Query()
     {
         var client = new RestClient("https://www.alphavantage.co/");
         var request = new RestRequest("query");
@@ -27,8 +27,9 @@ public class AlphaVintageClient
 
         var response = client.Get(request);
 
-        var returnValue = JsonConvert.DeserializeObject<AlphaVintageExchangeRateResponse>(response.Content);
+        //AlphaVintageExchangeRateResponse? returnValue = JsonConvert
+        //    .DeserializeObject<AlphaVintageExchangeRateResponse>(response.Content);
 
-        return returnValue;
+        return response.Content;
     }
 }

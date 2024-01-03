@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Logging;
 
 namespace Exchange_Rates_Update_Client;
 
@@ -9,12 +10,7 @@ public partial class ChartUpdateClient
     public ChartUpdateClient(string hubUrl, AlphaVintageClient alphaVintageClient){
         connection = new HubConnectionBuilder().WithUrl(hubUrl).Build();
         this.alphaVintageClient = alphaVintageClient;
-
-        connection.Closed += async (error) =>
-            {
-                await Task.Delay(new Random().Next(0,5) * 1000);
-                await connection.StartAsync();
-            };
+        connection.StartAsync().Wait();
     }
 
     public Task ValueReceiver(string chartValue)
@@ -24,21 +20,19 @@ public partial class ChartUpdateClient
 
     public void UpdateChart(object? state)
     {
-        try
-        {
-            var result = alphaVintageClient.Query();
-            connection.SendAsync("ValueSender", result).RunSynchronously();
 
-        }catch{
-            Console.WriteLine("An error occured in the Chart Update Client");
-        }
-
+        Console.WriteLine("Attempting Query...");
+        var result = alphaVintageClient.Query();
+        result.Wait();
+        Console.WriteLine(result.Result);
+        connection.SendAsync("ValueSender", result.Result).Wait();
     }
 
     public async Task ChangeCurrencyPair(string FromCurrency, string ToCurrency)
     {
         alphaVintageClient.fromCurrency = FromCurrency;
         alphaVintageClient.toCurrency = ToCurrency;
+        connection.SendAsync("CurrencyPairPageUpdate", FromCurrency, ToCurrency).Wait();
     }
 
     public Task CurrencyPairPageUpdate()

@@ -1,11 +1,24 @@
 ﻿using System.Threading;
-using System.Threading.Tasks;
 using Exchange_Rates_Update_Client;
 
-Console.WriteLine("Hello, World!");
+internal class Program
+{
+    private static void Main(string[] args)
+    {
+        Console.WriteLine("Hello, World!");
 
-var alpha = new AlphaVintageClient("USD", "JPY");
+        var alpha = new AlphaVintageClient("USD", "AUD");
 
-var gamma = new ChartUpdateClient("", alpha);
+        Console.WriteLine("Kindly supply the Hub's Url");
 
-Timer timer = new Timer(callback: new TimerCallback(gamma.UpdateChart), state: null, dueTime: 1000, period: 15000);
+        string HubUrl = Console.ReadLine();
+
+
+        ChartUpdateClient gamma = new ChartUpdateClient(HubUrl, alpha);
+
+        Timer timer = new Timer(callback: gamma.UpdateChart, state: null, dueTime: 0, period: 15000);
+        Console.WriteLine("Press Enter to exit the program.");
+        Console.ReadLine();
+        timer.Dispose();
+    }
+}
